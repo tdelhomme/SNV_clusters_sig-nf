@@ -63,3 +63,40 @@ pairs_list = Channel.fromPath( params.input_file ).splitCsv(header: true, sep: '
                    .map{ row -> [ row.sample, file(row.cluster), file(row.target) ] }.view()
 
 
+process compute_bed_clusters {
+
+       publishDir params.output_folder+"/BED/", mode: 'copy', pattern: '*.bed'
+
+       tag {sample}
+
+       input:
+       set val(sample), file(cluster), file(target) from pairs_list
+
+       output:
+       set val(sample), file(cluster), file(target), file("*.bed") into clu_tar_bed
+
+       shell:
+       '''
+       ls
+       touch empty.bed
+       '''
+  }
+
+process compute_extract_targets {
+
+       publishDir params.output_folder+"/VCF/", mode: 'copy', pattern: '*clustered.vcf.gz'
+
+       tag {sample}
+
+       input:
+       set val(sample), file(cluster), file(target), file(bed) from clu_tar_bed
+
+       output:
+       set val(sample), file(cluster), file(target), file("*clustered.vcf.gz") into clu_tar_bed_vcf
+
+       shell:
+       '''
+       ls
+       touch empty_clustered.vcf.gz
+       '''
+  }
