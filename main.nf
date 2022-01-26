@@ -43,6 +43,7 @@ if (params.help) {
     log.info ''
     log.info 'Mandatory arguments:'
     log.info '    --input_file                   FOLDER         Input file containing 2 columns: cluster (e.g. path to SV VCF) and target (e.g. SNV VCF).'
+    log.info '    --cluster_type                 STRING         Type of variant to make the clusters (SV or indels).'
     log.info ''
     log.info 'Optional arguments:'
     log.info '    --distance                     INTEGER        Distance to consider a cluster (default = 2Kb).'
@@ -54,9 +55,11 @@ if (params.help) {
 }
 
 params.input_file = null
+params.cluster_type = null
 params.distance = 2
 params.output_folder = "cluster_sig_output"
 
 pairs_list = Channel.fromPath( params.input_file ).splitCsv(header: true, sep: '\t', strip: true)
                    .map{ row -> [ row.sample, file(row.cluster), file(row.target) ] }.view()
+
 
