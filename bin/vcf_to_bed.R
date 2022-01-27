@@ -23,16 +23,16 @@ if(! is.null(args$help)) {
 }
 
 
-if(is.null(args$VCF)) {stop("Option --VCF should be provided")} else{VCF=as.numeric(args$VCF)}
+if(is.null(args$VCF)) {stop("Option --VCF should be provided")} else{VCF=args$VCF}
 if(is.null(args$caller)) {stop("Option --caller should be provided")} else{caller=args$caller}
 if(is.null(args$output_bed)) {stop("Option --output_bed should be provided")} else{output_bed=args$output_bed}
 
-sv_len = as.numeric(system(paste("~/bin/bcftools_bin/bin/bcftools query -f '%SVLEN\n' ", VCF, sep=""), intern = T))
+sv_len = as.numeric(system(paste("bcftools query -f '%SVLEN\n' ", VCF, sep=""), intern = T))
 sv_len[which(is.na(sv_len))] = 1
-sv_chr = system(paste("~/bin/bcftools_bin/bin/bcftools query -f '%CHROM\n' ", VCF, sep=""), intern = T)
-sv_pos = as.numeric(system(paste("~/bin/bcftools_bin/bin/bcftools query -f '%POS\n' ", VCF, sep=""), intern = T))
+sv_chr = system(paste("bcftools query -f '%CHROM\n' ", VCF, sep=""), intern = T)
+sv_pos = as.numeric(system(paste("bcftools query -f '%POS\n' ", VCF, sep=""), intern = T))
 
 dat = data.frame(CHR = sv_chr, START = sv_pos - abs(sv_len), END = sv_pos + abs(sv_len))
 dat[which(dat$START < 0)] = 1
 
-write.table(dat, file=output_bed, quote = FALSE, col.names = FALSE, row.names = F)
+write.table(dat, file=output_bed, quote = FALSE, col.names = FALSE, row.names = FALSE, sep = "\t")
