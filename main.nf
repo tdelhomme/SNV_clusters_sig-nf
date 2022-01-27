@@ -65,7 +65,7 @@ pairs_list = Channel.fromPath( params.input_file ).splitCsv(header: true, sep: '
 
 process compute_bed_clusters {
 
-       publishDir params.output_folder+"/BED/", mode: 'copy', pattern: '*.bed'
+       publishDir params.output_folder+"/BED/", mode: 'copy', pattern: '*merged.bed'
 
        tag {sample}
 
@@ -73,18 +73,23 @@ process compute_bed_clusters {
        set val(sample), file(cluster), file(target) from pairs_list
 
        output:
-       set val(sample), file(cluster), file(target), file("*.bed") into clu_tar_bed
+       set val(sample), file(cluster), file(target), file("*merged.bed") into clu_tar_bed
 
        shell:
        '''
-       ls
-       touch empty.bed
+       bcftools view -f 'PASS' !{cluster} -Oz > cluster_pass.vcf.gz
+       if [[ !{params.cluster_type} == "SV" ]] ; then 
+        echo "We consider a VCF of clusters from Manta SV calling"
+        Rscript  !{baseDir}/bin/vcf_to_bed.R --VCF=cluster_pass.vcf.gz --caller=manta --output_bed=cluster.bed
+       fi
+       cat cluster.bed | sort -k1,1 -k2,2n | bedtools merge -i stdin | awk '{print $1"\t"$2"\t"$3}' > cluster_merged.bed
        '''
   }
 
 process compute_extract_targets {
 
-       publishDir params.output_folder+"/VCF/", mode: 'copy', pattern: '*clustered.vcf.gz'
+       publishDir params.output_folder+"/VCF/", mode: 'copy', pattern: '*_cluster_*.vcf.gz'
+       publishDir params.output_folder+"/VCF/", mode: 'copy', pattern: '*_uncluster_*.vcf.gz'
 
        tag {sample}
 
@@ -92,11 +97,12 @@ process compute_extract_targets {
        set val(sample), file(cluster), file(target), file(bed) from clu_tar_bed
 
        output:
-       set val(sample), file(cluster), file(target), file("*clustered.vcf.gz") into clu_tar_bed_vcf
+       file("*_cluster_*.vcf.gz") into clus
+       file("*_uncluster_*.vcf.gz") into unclus
 
        shell:
        '''
-       ls
-       touch empty_clustered.vcf.gz
+       bcftools view --region-file !{bed} !{target} -Oz > !{sample}_cluster_mutations.vcf.gz # variants overlapping the bed file
+       bedtools intersect -v -a !{target} -b !{bed} -wa > !{sample}_uncluster_mutations.vcf.gz # variants non-overlapping the bed file
        '''
   }
