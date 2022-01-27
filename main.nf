@@ -102,6 +102,7 @@ process compute_extract_targets {
 
        shell:
        '''
+       tabix -p vcf !{target}
        bcftools view --regions-file !{bed} !{target} -Oz > !{sample}_cluster_mutations.vcf.gz # variants overlapping the bed file
        bedtools intersect -v -a !{target} -b !{bed} -wa > !{sample}_uncluster_mutations.vcf.gz # variants non-overlapping the bed file
        '''
