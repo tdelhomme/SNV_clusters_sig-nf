@@ -33,7 +33,7 @@ sv_chr = system(paste("bcftools query -f '%CHROM\n' ", VCF, sep=""), intern = T)
 sv_pos = as.numeric(system(paste("bcftools query -f '%POS\n' ", VCF, sep=""), intern = T))
 
 dat = data.frame(CHR = sv_chr, START = sv_pos - abs(sv_len), END = sv_pos + abs(sv_len))
-dat[which(dat$START < 0)] = 1
+dat[which(dat$START < 0), "START"] = 1
 dat = dat[which(sv_len < 10000), ] # do not consider very very large events for now
 
 write.table(dat, file=output_bed, quote = FALSE, col.names = FALSE, row.names = FALSE, sep = "\t")
