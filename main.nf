@@ -82,7 +82,7 @@ process compute_bed_clusters {
         echo "We consider a VCF of clusters from Manta SV calling"
         Rscript  !{baseDir}/bin/vcf_to_bed.R --VCF=cluster_pass.vcf.gz --caller=manta --output_bed=cluster.bed
        fi
-       cat cluster.bed | sort -k1,1 -k2,2n | bedtools merge -i stdin | awk '{print $1"\t"$2"\t"$3}' > cluster_merged.bed
+       cat cluster.bed | sort -k1,1 -k2,2n | bedtools merge -i stdin | awk '{print $1"\t"$2"\t"$3}' > !{sample}_cluster_merged.bed
        '''
   }
 
