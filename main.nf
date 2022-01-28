@@ -104,6 +104,8 @@ process compute_extract_targets {
        '''
        tabix -p vcf !{target}
        bcftools view -f PASS --regions-file !{bed} !{target} -Oz > !{sample}_cluster_PASS_mutations.vcf.gz # variants overlapping the bed file
-       bedtools intersect -v -a !{target} -b !{bed} -wa | bgzip -c | bcftools view -f PASS > !{sample}_uncluster_PASS_mutations.vcf.gz # variants non-overlapping the bed file
+       bedtools intersect -v -a !{target} -b !{bed} -wa > tmp
+       bcftools view -h !{target} > header
+       cat header tmp | bgzip -c | bcftools view -f PASS -Oz > !{sample}_uncluster_PASS_mutations.vcf.gz # variants non-overlapping the bed file
        '''
   }
