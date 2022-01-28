@@ -88,8 +88,8 @@ process compute_bed_clusters {
 
 process compute_extract_targets {
 
-       publishDir params.output_folder+"/VCF/", mode: 'copy', pattern: '*_cluster_*.vcf.gz'
-       publishDir params.output_folder+"/VCF/", mode: 'copy', pattern: '*_uncluster_*.vcf.gz'
+       publishDir params.output_folder+"/VCF/", mode: 'move', pattern: '*_cluster_*.vcf.gz'
+       publishDir params.output_folder+"/VCF/", mode: 'move', pattern: '*_uncluster_*.vcf.gz'
 
        tag {sample}
 
